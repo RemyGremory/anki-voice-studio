@@ -1,5 +1,5 @@
 {
   "schema": 1,
   "app_name": "Anki Voice Studio",
-  "release_manifest_url": ""
+  "release_manifest_url": "https://raw.githubusercontent.com/RemyGremory/anki-voice-studio/main/release_manifest.json"
 }
