@@ -2,12 +2,12 @@
 
 Local voice creation, MP3 generation, and Anki audio tools for Windows.
 
-**Anki Voice Studio works on your computer:** it can create custom voice
+**Anki Voice Studio runs locally on your computer.** It can create custom voice
 profiles, generate MP3 files for new vocabulary cards, and add audio to
 existing Anki notes. Your card texts, voice samples, profiles, and generated
-audio stay on the computer.
+audio stay on your computer.
 
-> Looking for the card design and review controls? Install the companion
+> For card design and review controls, see the
 > [Anki Card Template](https://github.com/RemyGremory/anki-card-template).
 
 ## What it can do
@@ -42,24 +42,26 @@ application, voice model, and your generated files.
 ## Create new cards with audio
 
 1. Open **New cards**.
-2. Paste a list of cards from your Python script or use the example.
+2. Paste a list of cards or use the included example.
 3. Choose what to voice: **Word**, **Translation**, and/or **Examples**.
 4. Choose languages and saved voice profiles. Use **Preview voice** before a
    large generation.
 5. Click **Create MP3 and CSV**.
 6. Import the resulting `anki_cards.csv` into Anki.
-7. Return to the program and complete step 4, **Add audio to Anki**. The program
-   copies the generated MP3 files into the selected Anki profile automatically.
+7. Return to the fourth panel, **Add audio to Anki**, and confirm that you
+   imported the cards. The program then copies the generated MP3 files into the
+   selected Anki profile automatically.
 8. Sync Anki normally to make the audio available on a phone.
 
-For the full interactive card experience, install the companion
+For the full interactive card experience, install the
 [Anki Card Template](https://github.com/RemyGremory/anki-card-template) first.
-It provides the matching `AudioWord`, `AudioTranslation`, and `AudioExample`
-fields and controls for recorded audio.
+It adds the `AudioWord`, `AudioTranslation`, and `AudioExample` fields and the
+controls for recorded audio.
 
 ## Add audio to existing Anki cards
 
-This mode needs the free AnkiConnect add-on on the Windows computer only.
+This mode needs the free AnkiConnect add-on. Install it only on the Windows
+computer where you run Anki Voice Studio and Anki Desktop.
 
 1. In Anki Desktop, choose **Tools → Add-ons → Get Add-ons…**.
 2. Enter `2055492159` and restart Anki.
@@ -74,14 +76,14 @@ been added on the computer.
 ## Voice Studio
 
 Use **Voice studio** to make a local voice profile. Add a short voice sample,
-enter exactly what is spoken in it, select voice traits, and listen to test
-text. A profile can be saved, used for card generation, or removed later.
+enter the exact words spoken in it, choose the voice settings, and preview test
+text. You can save the profile, use it for card generation, or remove it later.
 
 Only use voice samples that you have permission to use.
 
 ## Required Anki fields
 
-For the companion template, use these exact field names:
+For the card template, use these exact field names:
 
 `Front`, `Back`, `Description`, `Example`, `verb`, `Comment`, `Image`,
 `AudioWord`, `AudioTranslation`, `AudioExample`.
@@ -96,9 +98,8 @@ not matter; the names do.
 - The GitHub project intentionally excludes personal profiles, generated MP3s,
   card lists, reference recordings, and the downloaded model.
 
-## Development
+## Build files
 
-The repository includes build scripts for maintainers. Normal users should use
-only `AnkiVoiceStudioSetup.exe` from Releases.
-
-Created by Remy.
+This repository also contains files used to build the application. You do not
+need them to use Voice Studio: download only `AnkiVoiceStudioSetup.exe` from
+Releases.
