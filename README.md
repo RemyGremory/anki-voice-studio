@@ -7,6 +7,10 @@ profiles, generate MP3 files for new vocabulary cards, and add audio to
 existing Anki notes. Your card texts, voice samples, profiles, and generated
 audio stay on your computer.
 
+> **Close the app when you finish.** Click **Close app** at the top of Anki
+> Voice Studio. Closing only the browser tab does not stop the local program;
+> it can keep running in the background.
+
 > **Important: CPU generation is slow.** The Compact CPU edition is a
 > compatibility fallback, not an option for weak PCs. Creating roughly ten
 > seconds of audio can take about a minute and noticeably load the processor;
