@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anki Voice Studio</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/anki-voice-studio.svg">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div class="brand-mark" aria-hidden="true"><img src="/assets/anki-voice-studio.svg" alt=""></div>
+      <div>
+        <p class="eyebrow">LOCAL • OMNIVOICE</p>
+        <h1>Anki Voice Studio</h1>
+        <p class="hero-copy" data-i18n="hero_copy">Voices, MP3s, and Anki packs — all on this computer.</p>
+      </div>
+      <div class="hero-actions">
+        <div class="locale-switch" role="group" aria-label="Interface language">
+          <button id="localeEn" class="locale-button active" type="button" aria-pressed="true">EN</button>
+          <span aria-hidden="true">/</span>
+          <button id="localeRu" class="locale-button" type="button" aria-pressed="false">RU</button>
+        </div>
+        <div class="hero-note" data-i18n-html="hero_note">No cloud<br>or subscriptions</div>
+      </div>
+    </header>
+
+    <section id="componentsPanel" class="components-panel" aria-live="polite" hidden>
+      <span id="componentsIcon" class="components-icon">◌</span>
+      <div class="components-copy"><strong id="componentsTitle" data-i18n="components_checking">Checking components…</strong><p id="componentsText" data-i18n="components_checking_copy">This takes a few seconds and downloads nothing.</p></div>
+      <button id="checkComponents" class="button button-quiet mini" data-i18n="check">Check</button>
+      <button id="installComponents" class="button button-primary mini" disabled data-i18n="download_on_release">Download available with release</button>
+    </section>
+
+    <nav class="tabbar" aria-label="App sections" data-i18n-aria="sections_label">
+      <button class="tab active" data-view="cards" data-i18n="tab_cards">New cards</button>
+      <button class="tab" data-view="studio" data-i18n="tab_studio">Voice studio</button>
+      <button class="tab" data-view="anki" data-i18n="tab_anki">Cards from Anki</button>
+    </nav>
+
+    <section id="view-cards" class="view active">
+      <section class="intro-strip"><span class="intro-icon">✦</span><p data-i18n-html="cards_intro">Paste a list, choose voice profiles, and create a CSV with MP3 files. Examples are spoken only up to <b>—</b>, without the Russian translation.</p></section>
+      <div class="workspace">
+        <section class="panel cards-panel">
+          <div class="panel-heading"><span class="step">01</span><div><h2 data-i18n="cards_title">Cards</h2><p data-i18n="cards_copy">A list from your Python script works here.</p></div><span id="cardsCount" class="count-badge" data-i18n="not_checked">Not checked</span></div>
+          <textarea id="cardsInput" spellcheck="false" aria-label="Card list" data-i18n-aria="card_list_label"></textarea>
+          <div class="cards-actions"><button class="button button-secondary" id="validateCards" data-i18n="validate_list">✓ Validate list</button><label class="button button-quiet file-label"><span data-i18n="open_file">Open file</span><input id="cardsFile" type="file" accept=".json,.txt,.py,application/json,text/plain"></label><button class="text-button" id="loadExample" data-i18n="load_example">Load example</button></div>
+          <p class="fine-print" data-i18n="safe_input">The app reads only the list data and never runs pasted code.</p>
+        </section>
+        <section class="panel audio-settings">
+          <div class="panel-heading"><span class="step">02</span><div><h2 data-i18n="what_to_voice">What to voice</h2><p data-i18n="profiles_in_studio">Create and edit voice profiles in Voice studio.</p></div></div>
+          <div class="compact-roles">
+            <article class="compact-role"><label class="toggle-line"><input id="wordEnabled" type="checkbox" checked><span class="toggle"></span><b data-i18n="word">Word</b></label><span class="role-badge">WORD</span><label><span data-i18n="language">Language</span><select id="wordLanguage" class="select language-select"></select></label><input id="wordCustomLanguage" class="input custom-language" placeholder="Another language" data-i18n-placeholder="another_language"><label><span data-i18n="voice">Voice</span><select id="wordProfileSelect" class="select profile-select"></select></label><button class="text-button role-preview" data-role="word" data-i18n="preview_voice">▶ Preview voice</button></article>
+            <article class="compact-role"><label class="toggle-line"><input id="translationEnabled" type="checkbox" checked><span class="toggle"></span><b data-i18n="translation">Translation</b></label><span class="role-badge">BACK</span><label><span data-i18n="language">Language</span><select id="translationLanguage" class="select language-select"></select></label><input id="translationCustomLanguage" class="input custom-language" placeholder="Another language" data-i18n-placeholder="another_language"><label><span data-i18n="voice">Voice</span><select id="translationProfileSelect" class="select profile-select"></select></label><button class="text-button role-preview" data-role="translation" data-i18n="preview_voice">▶ Preview voice</button></article>
+            <article class="compact-role example-role"><label class="toggle-line"><input id="exampleEnabled" type="checkbox" checked><span class="toggle"></span><b data-i18n="examples">Examples</b></label><span class="role-badge">EXAMPLE</span><label><span data-i18n="language">Language</span><select id="exampleLanguage" class="select language-select"></select></label><input id="exampleCustomLanguage" class="input custom-language" placeholder="Another language" data-i18n-placeholder="another_language"><label><span data-i18n="voice">Voice</span><select id="exampleProfileSelect" class="select profile-select"></select></label><button class="text-button role-preview" data-role="example" data-i18n="preview_voice">▶ Preview voice</button></article>
+          </div>
+          <label class="checkbox-line"><input id="stripBrackets" type="checkbox" checked><span data-i18n="skip_brackets">Do not speak text in parentheses</span></label>
+          <label class="sentence-pause-control"><span data-i18n="example_sentence_pause">Pause between sentences in examples</span><select id="examplePause" class="select"><option value="0" data-i18n="example_pause_none">No extra pause</option><option value="0.3" data-i18n="example_pause_03">0.3 sec</option><option value="0.5" selected data-i18n="example_pause_05">0.5 sec</option><option value="0.8" data-i18n="example_pause_08">0.8 sec</option><option value="1" data-i18n="example_pause_10">1 sec</option></select></label>
+        </section>
+        <section class="panel generate-panel"><div class="panel-heading compact"><span class="step">03</span><div><h2 data-i18n="create_anki_pack">Create Anki pack</h2><p data-i18n="pack_copy">The result folder will contain the CSV and MP3 files.</p></div></div><button id="generate" class="button button-primary generate-button" data-i18n="create_mp3_csv">✦ Create MP3 and CSV</button></section>
+        <section id="cardsImportStep" class="panel import-to-anki-panel" hidden><div class="panel-heading compact"><span class="step">04</span><div><h2 data-i18n="import_audio_step">Add audio to Anki</h2><p data-i18n-html="import_audio_copy">First import <code>anki_cards.csv</code> into Anki. Then come back here and click the button below — the program will copy the MP3 files itself.</p></div></div><label id="cardsMediaTargetGroup" class="field-label"><span data-i18n="anki_profile">Anki profile</span><select id="cardsMediaTarget" class="select"></select></label><p id="cardsMediaTargetNote" class="fine-print"></p><div class="button-row import-actions"><button id="cardsOpenPack" type="button" class="button button-quiet" data-i18n="open_folder">Open folder</button><button id="cardsCopyAudio" type="button" class="button button-secondary" data-i18n="import_then_copy">I imported cards — add audio</button></div></section>
+      </div>
+    </section>
+
+    <section id="view-studio" class="view" hidden>
+      <section class="intro-strip"><span class="intro-icon">◌</span><p data-i18n="studio_intro">Store voice profiles and create separate MP3 files — not only for cards.</p></section>
+      <div class="studio-grid">
+        <section class="panel">
+          <div class="panel-heading"><span class="step">01</span><div><h2 data-i18n="voice_profile">Voice profile</h2><p data-i18n="voice_profile_copy">Upload a sample or describe a voice, save it, and use it in cards.</p></div></div>
+          <label class="field-label" data-i18n="saved_profile">Saved profile</label><select id="studioProfileSelect" class="select profile-select"></select>
+          <label class="field-label" data-i18n="profile_name">Profile name</label><input id="studioProfileName" class="input" placeholder="For example, Norwegian male" data-i18n-placeholder="profile_example">
+          <label class="field-label" data-i18n="test_language">Language for preview</label><select id="studioLanguage" class="select language-select"></select><input id="studioCustomLanguage" class="input custom-language" placeholder="Another language" data-i18n-placeholder="another_language">
+          <label class="field-label" data-i18n-html="voice_sample">Voice sample <span>3–10 seconds</span></label><label class="upload-box" for="studioReferenceFile"><span class="upload-icon">↑</span><span class="upload-caption" id="studioReferenceName" data-i18n="choose_audio_sample">Choose WAV, MP3, M4A, or FLAC</span><input id="studioReferenceFile" type="file" accept="audio/*,.m4a,.flac"></label><input id="studioReferencePath" type="hidden">
+          <label class="field-label" data-i18n="reference_text">Exact text from the sample</label><input id="studioReferenceText" class="input" placeholder="What is said in the audio" data-i18n-placeholder="sample_speech">
+          <section class="voice-traits" aria-labelledby="voiceTraitsTitle">
+            <div class="traits-heading"><label id="voiceTraitsTitle" class="field-label" data-i18n="voice_traits">Voice traits</label><button id="studioClearTags" type="button" class="text-button" data-i18n="clear_traits">Clear</button></div>
+            <p class="fine-print trait-copy" data-i18n="voice_traits_copy">These are every English instruction item OmniVoice currently supports.</p>
+            <div class="voice-traits-grid">
+              <fieldset class="voice-tag-group" data-mode="single"><legend data-i18n="trait_identity">Voice</legend><button type="button" class="voice-tag" data-tag="female" data-i18n="trait_feminine">Female</button><button type="button" class="voice-tag" data-tag="male" data-i18n="trait_masculine">Male</button></fieldset>
+              <fieldset class="voice-tag-group" data-mode="single"><legend data-i18n="trait_age">Age</legend><button type="button" class="voice-tag" data-tag="child" data-i18n="trait_child">Child</button><button type="button" class="voice-tag" data-tag="teenager" data-i18n="trait_teen">Teenager</button><button type="button" class="voice-tag" data-tag="young adult" data-i18n="trait_young_adult">Young adult</button><button type="button" class="voice-tag" data-tag="middle-aged" data-i18n="trait_middle_aged">Middle-aged</button><button type="button" class="voice-tag" data-tag="elderly" data-i18n="trait_elderly">Elderly</button></fieldset>
+              <fieldset class="voice-tag-group voice-tag-group-wide" data-mode="single"><legend data-i18n="trait_accent">Accent</legend><button type="button" class="voice-tag" data-tag="american accent" data-i18n="trait_american">American</button><button type="button" class="voice-tag" data-tag="australian accent" data-i18n="trait_australian">Australian</button><button type="button" class="voice-tag" data-tag="british accent" data-i18n="trait_british">British</button><button type="button" class="voice-tag" data-tag="canadian accent" data-i18n="trait_canadian">Canadian</button><button type="button" class="voice-tag" data-tag="chinese accent" data-i18n="trait_chinese">Chinese</button><button type="button" class="voice-tag" data-tag="indian accent" data-i18n="trait_indian">Indian</button><button type="button" class="voice-tag" data-tag="japanese accent" data-i18n="trait_japanese">Japanese</button><button type="button" class="voice-tag" data-tag="portuguese accent" data-i18n="trait_portuguese">Portuguese</button><button type="button" class="voice-tag" data-tag="russian accent" data-i18n="trait_russian">Russian</button></fieldset>
+              <fieldset class="voice-tag-group voice-tag-group-wide" data-mode="single"><legend data-i18n="trait_pitch">Pitch</legend><button type="button" class="voice-tag" data-tag="very low pitch" data-i18n="trait_very_low">Very low</button><button type="button" class="voice-tag" data-tag="low pitch" data-i18n="trait_low">Low</button><button type="button" class="voice-tag" data-tag="moderate pitch" data-i18n="trait_moderate_pitch">Moderate</button><button type="button" class="voice-tag" data-tag="high pitch" data-i18n="trait_high">High</button><button type="button" class="voice-tag" data-tag="very high pitch" data-i18n="trait_very_high">Very high</button></fieldset>
+              <fieldset class="voice-tag-group voice-tag-group-wide"><legend data-i18n="trait_style">Style</legend><button type="button" class="voice-tag" data-tag="whisper" data-i18n="trait_whisper">Whisper</button></fieldset>
+            </div>
+          </section>
+          <input id="studioInstruction" type="hidden"><p class="fine-print trait-copy" data-i18n="voice_clone_note">For Norwegian and other accents not listed here, use the matching language and a voice sample. A loaded sample defines the clone.</p>
+          <div class="speed-row"><label class="field-label" data-i18n="speed">Speed</label><input id="studioSpeed" class="speed-input" type="number" min="0.60" max="1.40" step="0.05" value="1.00"></div><div class="button-row"><button id="studioSaveProfile" class="button button-primary" data-i18n="save_profile">Save profile</button><button id="studioDeleteProfile" class="button button-danger" data-i18n="delete_profile">Delete profile</button><button id="studioDeleteReference" class="button button-quiet" data-i18n="delete_sample">Delete sample</button></div>
+        </section>
+        <section class="panel studio-speech"><div class="panel-heading"><span class="step">02</span><div><h2 data-i18n="speak_any_text">Speak any text</h2><p data-i18n="speak_any_copy">The MP3 is saved separately, in the app folder.</p></div></div><textarea id="studioText" class="studio-text" placeholder="Write or paste any text…" data-i18n-placeholder="write_text"></textarea><label class="checkbox-line"><input id="studioStripBrackets" type="checkbox" checked><span data-i18n="skip_brackets">Do not speak text in parentheses</span></label><div class="button-row"><button id="studioPreview" class="button button-secondary" data-i18n="listen">▶ Listen</button><button id="studioGenerate" class="button button-primary" data-i18n="save_mp3">Save MP3</button><button id="studioUseAsSample" class="button button-secondary" disabled data-i18n="use_recording_as_sample">Use as voice sample</button><button id="studioOpenOutput" class="button button-quiet" disabled data-i18n="open_folder">Open folder</button></div></section>
+      </div>
+    </section>
+
+    <section id="view-anki" class="view" hidden>
+      <section class="intro-strip"><span class="intro-icon">↻</span><p data-i18n="anki_intro">This mode changes only the selected notes in open Anki and replaces audio only in the enabled fields.</p></section>
+      <div class="studio-grid">
+        <section class="panel anki-connect"><div class="panel-heading"><span class="step">01</span><div><h2 data-i18n="connect_anki">Connect to Anki</h2><p id="ankiConnection" data-i18n="open_anki_check">Open Anki Desktop and click Check connection.</p></div></div><div class="button-row anki-connection-actions"><button id="ankiConnect" class="button button-primary" data-i18n="check_connection">Check connection</button><button id="ankiGuide" class="button button-quiet" data-i18n="how_to_connect">How to connect?</button></div><p class="fine-print" data-i18n="anki_connect_note">This needs the AnkiConnect add-on. The app never edits Anki’s database directly.</p><label class="field-label" data-i18n="what_to_voice">What to voice</label><div class="anki-scope"><button id="ankiSourceDeck" class="scope-button active" disabled data-i18n="whole_deck">Whole deck</button><button id="ankiUseSelection" class="scope-button" disabled data-i18n="selected_in_browse">Selected in Browse</button></div><div id="ankiDeckGroup"><label class="field-label" data-i18n="deck">Deck</label><select id="ankiDeck" class="select" disabled><option data-i18n="connect_first">Connect to Anki first</option></select></div><div id="ankiSelectedGroup" class="selection-note" hidden><p id="ankiSelectedStatus" data-i18n="selection_instruction">In Anki Browse, select one or more notes and click Selected in Browse.</p><p class="fine-print" data-i18n="selection_hint">Select one note or several: Ctrl / Shift on PC.</p></div><section id="ankiPronunciationEditor" class="pronunciation-editor" hidden><h3 data-i18n="pronunciation_title">Pronunciation text</h3><p data-i18n="pronunciation_copy">These edits apply only to the MP3 for this card. The text in Anki will not change.</p><label class="field-label" data-i18n="pronunciation_word">Word</label><textarea id="ankiPronunciationWord" class="pronunciation-text" spellcheck="false" data-i18n-placeholder="pronunciation_placeholder" placeholder="Text to send to the voice"></textarea><label class="field-label" data-i18n="pronunciation_translation">Translation</label><textarea id="ankiPronunciationTranslation" class="pronunciation-text" spellcheck="false" data-i18n-placeholder="pronunciation_placeholder" placeholder="Text to send to the voice"></textarea><label class="field-label" data-i18n="pronunciation_example">Examples</label><textarea id="ankiPronunciationExample" class="pronunciation-text" spellcheck="false" data-i18n-placeholder="pronunciation_placeholder" placeholder="Text to send to the voice"></textarea></section><label class="checkbox-line"><input id="ankiReplaceExisting" type="checkbox" checked><span data-i18n="replace_existing_audio">Replace audio in the enabled fields</span></label><button id="ankiScan" class="button button-secondary" disabled data-i18n="find_cards">Find cards</button><p id="ankiCount" class="fine-print" data-i18n="deck_not_selected">No deck selected yet.</p></section>
+        <section class="panel anki-settings"><div class="panel-heading"><span class="step">02</span><div><h2 data-i18n="add_to_existing">Add to existing cards</h2><p data-i18n-html="anki_fields_note">Anki needs <code>AudioWord</code>, <code>AudioTranslation</code>, and optionally <code>AudioExample</code> fields.</p></div></div><div class="compact-roles"><article class="compact-role"><label class="toggle-line"><input id="ankiWordEnabled" type="checkbox" checked><span class="toggle"></span><b data-i18n="word">Word</b></label><label><span data-i18n="language">Language</span><select id="ankiWordLanguage" class="select language-select"></select></label><label><span data-i18n="voice">Voice</span><select id="ankiWordProfile" class="select profile-select"></select></label><button class="text-button anki-role-preview" data-role="word" data-i18n="preview_voice">▶ Preview voice</button></article><article class="compact-role"><label class="toggle-line"><input id="ankiTranslationEnabled" type="checkbox" checked><span class="toggle"></span><b data-i18n="translation">Translation</b></label><label><span data-i18n="language">Language</span><select id="ankiTranslationLanguage" class="select language-select"></select></label><label><span data-i18n="voice">Voice</span><select id="ankiTranslationProfile" class="select profile-select"></select></label><button class="text-button anki-role-preview" data-role="translation" data-i18n="preview_voice">▶ Preview voice</button></article><article class="compact-role"><label class="toggle-line"><input id="ankiExampleEnabled" type="checkbox" checked><span class="toggle"></span><b data-i18n="examples">Examples</b></label><label><span data-i18n="language">Language</span><select id="ankiExampleLanguage" class="select language-select"></select></label><label><span data-i18n="voice">Voice</span><select id="ankiExampleProfile" class="select profile-select"></select></label><button class="text-button anki-role-preview" data-role="example" data-i18n="preview_voice">▶ Preview voice</button></article></div><label class="checkbox-line"><input id="ankiStripBrackets" type="checkbox" checked><span data-i18n="skip_brackets">Do not speak text in parentheses</span></label><button id="ankiGenerate" class="button button-primary generate-button" disabled data-i18n="add_audio_to_anki">✦ Add audio to Anki</button></section>
+      </div>
+    </section>
+
+    <section id="progressPanel" class="progress-panel" hidden><div class="progress-title"><strong id="progressTitle" data-i18n="preparing">Preparing…</strong><span id="progressNumbers">0 / 0</span></div><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><p id="progressStatus" data-i18n="do_not_close">Do not close the app while audio is being created.</p></section>
+    <section id="resultPanel" class="result-panel" hidden><div class="result-icon">✓</div><div><h2 id="resultTitle" data-i18n="done">Done</h2><p id="resultText"></p></div><button id="openResult" class="button button-secondary" data-i18n="open_folder">Open folder</button></section>
+    <section id="previewPanel" class="preview-panel" hidden><div><span class="eyebrow" data-i18n="preview">PREVIEW</span><p id="previewText"></p></div><audio id="previewAudio" controls preload="metadata"></audio><button id="closePreview" class="close-button" aria-label="Close" data-i18n-aria="close">×</button></section>
+    <p class="app-credit" aria-label="Author">by Remy</p>
+  </main>
+
+  <section id="ankiGuideModal" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="ankiGuideTitle">
+    <div class="modal-card">
+      <button id="closeAnkiGuide" class="close-button modal-close" type="button" aria-label="Close" data-i18n-aria="close">×</button>
+      <span class="eyebrow">ANKI DESKTOP</span>
+      <h2 id="ankiGuideTitle" data-i18n="guide_title">Connect existing cards</h2>
+      <p data-i18n="guide_intro">This tab uses AnkiConnect — a small add-on that lets the open Anki Desktop app safely communicate with Voice Studio.</p>
+      <ol class="guide-steps"><li data-i18n="guide_step_1">Open Anki Desktop on this computer.</li><li data-i18n-html="guide_step_2">Choose <b>Tools → Add-ons → Get Add-ons…</b></li><li data-i18n-html="guide_step_3">Paste this code and confirm: <code>2055492159</code></li><li data-i18n="guide_step_4">Restart Anki, leave it open, then return here and check the connection.</li></ol>
+      <div class="guide-code"><code>2055492159</code><button id="copyAnkiConnectCode" class="button button-secondary mini" type="button" data-i18n="copy_code">Copy code</button></div>
+      <p class="fine-print" data-i18n="guide_phone_note">Nothing needs to be installed on your phone. After audio is added, just sync Anki as usual.</p>
+      <div class="button-row"><a class="button button-primary" href="https://ankiweb.net/shared/info/2055492159" target="_blank" rel="noreferrer" data-i18n="open_anki_connect">Open AnkiConnect page</a><button id="guideDone" class="button button-quiet" type="button" data-i18n="got_it">Got it</button></div>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

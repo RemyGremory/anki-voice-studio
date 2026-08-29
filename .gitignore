@@ -1,0 +1,22 @@
+# Personal Voice Studio data — never publish these files or folders.
+voice_profiles.json
+Prepare Voice Studio for GitHub.cmd
+voice_references/
+outputs/
+previews/
+studio_audio/
+
+# Local development/runtime files.
+.venv/
+.venv-*/
+.cache/
+__pycache__/
+*.py[cod]
+build/
+dist/
+models/
+
+# Windows and editor files.
+Thumbs.db
+Desktop.ini
+.vscode/

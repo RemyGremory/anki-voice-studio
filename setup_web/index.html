@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Anki Voice Studio Setup</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="mark">AV</div>
+      <div><p class="eyebrow">LOCAL • OMNIVOICE</p><h1>Anki Voice Studio</h1><p>Setup and updates — no Python or manual modules.</p></div>
+    </header>
+
+    <section class="card status-card">
+      <div class="status-icon" id="statusIcon">◌</div>
+      <div><strong id="statusTitle">Checking release information…</strong><p id="statusText">The setup is checking what this computer needs.</p></div>
+      <button class="secondary" id="refreshButton">Refresh</button>
+    </section>
+
+    <section class="card" id="installCard">
+      <div class="section-heading"><span>01</span><div><h2>Choose installation mode</h2><p id="gpuText">Checking this computer…</p></div></div>
+      <label class="choice" id="cpuChoice"><input type="radio" name="edition" value="cpu"><span><strong>Compact CPU</strong><small>Works on every Windows PC.</small></span></label>
+      <label class="choice" id="nvidiaChoice"><input type="radio" name="edition" value="nvidia"><span><strong>Faster NVIDIA</strong><small>Uses a supported NVIDIA graphics card.</small></span></label>
+      <div class="progress-wrap" hidden id="progressWrap"><div class="progress"><i id="progressBar"></i></div><span id="progressValue">0%</span></div>
+      <button class="primary" id="installButton" disabled>Install Anki Voice Studio</button>
+      <p class="fine-print">The large voice model downloads automatically from the official OmniVoice source when audio is created for the first time.</p>
+    </section>
+
+    <section class="card launch-card" id="launchCard" hidden>
+      <div class="section-heading"><span>02</span><div><h2>Ready to open</h2><p id="launchText">Anki Voice Studio is installed.</p></div></div>
+      <button class="primary" id="launchButton">Open Anki Voice Studio</button>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

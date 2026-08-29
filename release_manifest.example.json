@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "version": "0.1.0",
+  "assets": {
+    "cpu": {
+      "label": "Anki Voice Studio — Compact CPU",
+      "root": "AnkiVoiceStudio-CPU",
+      "executable": "AnkiVoiceStudio-CPU.exe",
+      "archives": [
+        {
+          "url": "https://github.com/OWNER/REPOSITORY/releases/download/v0.1.0/AnkiVoiceStudio-CPU-part-01.zip",
+          "sha256": "PUT_THE_64_CHARACTER_SHA256_HERE",
+          "size": 0
+        }
+      ]
+    },
+    "nvidia": {
+      "label": "Anki Voice Studio — Faster NVIDIA",
+      "root": "AnkiVoiceStudio-NVIDIA",
+      "executable": "AnkiVoiceStudio-NVIDIA.exe",
+      "archives": [
+        {
+          "url": "https://github.com/OWNER/REPOSITORY/releases/download/v0.1.0/AnkiVoiceStudio-NVIDIA-part-01.zip",
+          "sha256": "PUT_THE_64_CHARACTER_SHA256_HERE",
+          "size": 0
+        }
+      ]
+    }
+  }
+}

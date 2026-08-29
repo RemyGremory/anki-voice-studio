@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "release": {
+    "app_version": "0.1.0-beta",
+    "channel": "beta",
+    "repository": ""
+  },
+  "downloads": {
+    "omnivoice-model": {
+      "url": "",
+      "sha256": "",
+      "root": "OmniVoice"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# Faster edition for PCs with a supported NVIDIA video card.
+# Install with PyTorch's CUDA 12.8 index.
+-r requirements-common.txt
+torch==2.8.0
+torchaudio==2.8.0
