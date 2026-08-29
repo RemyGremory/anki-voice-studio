@@ -35,6 +35,9 @@ def wait_for_setup(process: subprocess.Popen[bytes], timeout: float = 20) -> Non
                 setup_logo = response.read()
             with urlopen("http://127.0.0.1:8767/assets/anki-voice-studio.ico", timeout=2) as response:
                 setup_icon = response.read()
+            if not status.get("release_ready"):
+                time.sleep(0.25)
+                continue
             assert "Choose installation mode" in page
             assert "Choose folder" in page
             assert "generation is slow" in page

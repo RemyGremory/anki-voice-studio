@@ -12,7 +12,7 @@
         "executable": "AnkiVoiceStudio-CPU.exe",
         "archives": [
           {
-            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.1/AnkiVoiceStudio-CPU.zip",
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/0.1.1/AnkiVoiceStudio-CPU.zip",
             "sha256": "1c25c60476882e26e1cd4f9027c8e51095967651a8f0b65b8b5d28dfb921c9e8",
             "size": 873923159
           }
@@ -24,17 +24,17 @@
         "executable": "AnkiVoiceStudio-NVIDIA.exe",
         "archives": [
           {
-            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.1/AnkiVoiceStudio-NVIDIA-part-01.zip",
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/0.1.1/AnkiVoiceStudio-NVIDIA-part-01.zip",
             "sha256": "5c585b1425bcc757327c79089aaa231f078d4aec7ab1e4ad521898f84a00c5da",
             "size": 1518415619
           },
           {
-            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.1/AnkiVoiceStudio-NVIDIA-part-02.zip",
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/0.1.1/AnkiVoiceStudio-NVIDIA-part-02.zip",
             "sha256": "4499a377dcc9c9f6b193c3ac17e2d56b75f0a1811d1ffa86ed4edee4aa0f3ae3",
             "size": 1842277304
           },
           {
-            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.1/AnkiVoiceStudio-NVIDIA-part-03.zip",
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/0.1.1/AnkiVoiceStudio-NVIDIA-part-03.zip",
             "sha256": "4d8a7f918f8fe6358217557272800a1af8b9745ec6bc8310971f54f18cfabc93",
             "size": 1720027266
           }
