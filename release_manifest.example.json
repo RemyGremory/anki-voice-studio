@@ -1,9 +1,10 @@
 {
-  "schema": 1,
+  "schema": 2,
   "version": "0.1.0",
   "assets": {
     "cpu": {
       "label": "Anki Voice Studio — Compact CPU",
+      "version": "0.1.0",
       "root": "AnkiVoiceStudio-CPU",
       "executable": "AnkiVoiceStudio-CPU.exe",
       "archives": [
@@ -16,6 +17,7 @@
     },
     "nvidia": {
       "label": "Anki Voice Studio — Faster NVIDIA",
+      "version": "0.1.0",
       "root": "AnkiVoiceStudio-NVIDIA",
       "executable": "AnkiVoiceStudio-NVIDIA.exe",
       "archives": [
@@ -26,5 +28,9 @@
         }
       ]
     }
+  },
+  "patches": {
+    "cpu": [],
+    "nvidia": []
   }
 }

@@ -1,13 +1,14 @@
 {
-  "schema": 1,
+  "schema": 2,
   "app_name": "Anki Voice Studio",
   "release_manifest_url": "https://raw.githubusercontent.com/RemyGremory/anki-voice-studio/main/release_manifest.json",
   "release_manifest": {
-    "schema": 1,
+    "schema": 2,
     "version": "0.1.1",
     "assets": {
       "cpu": {
         "label": "Anki Voice Studio — Compact CPU",
+        "version": "0.1.1",
         "root": "AnkiVoiceStudio-CPU",
         "executable": "AnkiVoiceStudio-CPU.exe",
         "archives": [
@@ -20,6 +21,7 @@
       },
       "nvidia": {
         "label": "Anki Voice Studio — Faster NVIDIA",
+        "version": "0.1.1",
         "root": "AnkiVoiceStudio-NVIDIA",
         "executable": "AnkiVoiceStudio-NVIDIA.exe",
         "archives": [
@@ -40,6 +42,10 @@
           }
         ]
       }
+    },
+    "patches": {
+      "cpu": [],
+      "nvidia": []
     }
   }
 }

@@ -185,6 +185,7 @@ def is_newer(remote: str, local: str) -> bool:
 class Asset:
     key: str
     label: str
+    version: str
     root: str
     executable: str
     archives: tuple[dict[str, Any], ...]
@@ -200,9 +201,47 @@ def parse_asset(key: str, value: Any) -> Asset:
     return Asset(
         key=key,
         label=as_text(data.get("label")) or key,
+        version=as_text(data.get("version")),
         root=as_text(data.get("root")),
         executable=as_text(data.get("executable")),
         archives=tuple(item for item in archives if isinstance(item, dict)),
+    )
+
+
+@dataclass(frozen=True)
+class UpdatePatch:
+    """A small, verified overlay for one installed edition."""
+
+    key: str
+    label: str
+    from_version: str
+    to_version: str
+    root: str
+    archives: tuple[dict[str, Any], ...]
+    remove: tuple[str, ...]
+
+    @property
+    def configured(self) -> bool:
+        return (
+            bool(self.from_version)
+            and bool(self.to_version)
+            and bool(self.archives)
+            and all(as_text(item.get("url")) for item in self.archives)
+        )
+
+
+def parse_update_patch(key: str, value: Any) -> UpdatePatch:
+    data = value if isinstance(value, dict) else {}
+    archives = data.get("archives") if isinstance(data.get("archives"), list) else []
+    remove = data.get("remove") if isinstance(data.get("remove"), list) else []
+    return UpdatePatch(
+        key=key,
+        label=as_text(data.get("label")) or "Small update",
+        from_version=as_text(data.get("from_version")),
+        to_version=as_text(data.get("to_version")),
+        root=as_text(data.get("root")),
+        archives=tuple(item for item in archives if isinstance(item, dict)),
+        remove=tuple(as_text(item) for item in remove if as_text(item)),
     )
 
 
@@ -245,11 +284,27 @@ class Installer:
 
         local_state = read_json(STATE_PATH)
         remote_version = as_text(manifest.get("version"))
-        app_needed = not self.app_is_installed(local_state, edition, target) or local_state.get("version") != remote_version
+        if not remote_version:
+            raise ValueError("The release does not have a version number.")
 
-        if app_needed:
-            self.report("Downloading Anki Voice Studio…", 0)
-            self.install_asset(app_asset, target, self.app_is_valid)
+        installed = self.app_is_installed(local_state, edition, target)
+        installed_version = as_text(local_state.get("version"))
+        if not installed or installed_version != remote_version:
+            patch_path = self.find_update_path(manifest, edition, installed_version, remote_version) if installed else None
+            base_version = app_asset.version or remote_version
+            base_patches = self.find_update_path(manifest, edition, base_version, remote_version)
+
+            if installed and patch_path is not None:
+                self.report("Downloading a small update…", 0)
+                self.install_patch_path(patch_path, app_asset, target)
+            else:
+                if base_patches is None:
+                    raise ValueError("This release is missing the files needed for installation or update.")
+                self.report("Downloading Anki Voice Studio…", 0)
+                self.install_asset(app_asset, target, self.app_is_valid)
+                if base_patches:
+                    self.report("Downloading a small update…", 0)
+                    self.install_patch_path(base_patches, app_asset, target)
 
         executable = self.find_executable(app_asset, target)
         state = {
@@ -264,6 +319,43 @@ class Installer:
         self.ensure_setup_shortcut()
         self.report("Ready.", 100)
         return {"version": remote_version, "edition": edition, "executable": str(executable)}
+
+    def find_update_path(
+        self,
+        manifest: dict[str, Any],
+        edition: str,
+        from_version: str,
+        to_version: str,
+    ) -> list[UpdatePatch] | None:
+        """Find a verified chain of small updates, if one is available.
+
+        A release can keep its last full build as the base and add one small
+        patch per normal version. This breadth-first search also lets a new
+        installation apply several small patches after the base build.
+        """
+        if from_version == to_version:
+            return []
+        raw_patches = manifest.get("patches") if isinstance(manifest.get("patches"), dict) else {}
+        entries = raw_patches.get(edition) if isinstance(raw_patches.get(edition), list) else []
+        patches = [
+            parse_update_patch(f"{edition}-{index}", value)
+            for index, value in enumerate(entries, start=1)
+            if isinstance(value, dict)
+        ]
+        patches = [patch for patch in patches if patch.configured and is_newer(patch.to_version, patch.from_version)]
+        pending: list[tuple[str, list[UpdatePatch]]] = [(from_version, [])]
+        visited = {from_version}
+        while pending:
+            current, route = pending.pop(0)
+            for patch in patches:
+                if patch.from_version != current or patch.to_version in visited:
+                    continue
+                next_route = [*route, patch]
+                if patch.to_version == to_version:
+                    return next_route
+                visited.add(patch.to_version)
+                pending.append((patch.to_version, next_route))
+        return None
 
     def app_is_installed(self, state: dict[str, Any], edition: str, target: Path) -> bool:
         executable = Path(as_text(state.get("executable")))
@@ -283,6 +375,51 @@ class Installer:
         if not candidates:
             raise ValueError("The app executable was not found after installation.")
         return candidates[0]
+
+    def extracted_root(self, unpacked: Path, root: str) -> Path:
+        unpacked = unpacked.resolve()
+        candidate = (unpacked / root).resolve() if root else unpacked
+        if unpacked not in (candidate, *candidate.parents):
+            raise ValueError("The update contains an unsafe folder path.")
+        return candidate
+
+    def remove_staged_paths(self, staged: Path, paths: tuple[str, ...]) -> None:
+        staged = staged.resolve()
+        for value in paths:
+            relative = Path(value)
+            if not value or relative.is_absolute() or ".." in relative.parts:
+                raise ValueError("The update contains an unsafe removal path.")
+            target = (staged / relative).resolve()
+            if staged not in (target, *target.parents):
+                raise ValueError("The update contains an unsafe removal path.")
+            if target.is_dir():
+                shutil.rmtree(target)
+            elif target.exists():
+                target.unlink()
+
+    def replace_installation(self, staged: Path, target: Path, validator: Callable[[Path], bool]) -> None:
+        if not validator(staged):
+            shutil.rmtree(staged, ignore_errors=True)
+            raise ValueError("The installed files did not pass validation.")
+        backup = target.with_name(target.name + "-previous")
+        shutil.rmtree(backup, ignore_errors=True)
+        had_target = target.exists()
+        try:
+            if had_target:
+                target.replace(backup)
+            staged.replace(target)
+        except PermissionError as error:
+            if had_target and not target.exists() and backup.exists():
+                backup.replace(target)
+            raise ValueError("Close Anki Voice Studio before installing the update, then try again.") from error
+        except OSError as error:
+            if had_target and not target.exists() and backup.exists():
+                backup.replace(target)
+            raise ValueError("The program files could not be replaced. Close Anki Voice Studio and try again.") from error
+        finally:
+            shutil.rmtree(staged, ignore_errors=True)
+            if target.exists():
+                shutil.rmtree(backup, ignore_errors=True)
 
     def ensure_setup_shortcut(self) -> None:
         """Keep a stable desktop launcher after the user removes Downloads.
@@ -341,21 +478,43 @@ class Installer:
                 self.download_archive(source, archive, label, index - 1, archive_count)
                 safe_extract_zip(archive, unpacked)
 
-            source_root = unpacked / asset.root if asset.root else unpacked
+            source_root = self.extracted_root(unpacked, asset.root)
             if not source_root.is_dir() or not validator(source_root):
                 raise ValueError("The downloaded files are incomplete or have an invalid structure.")
             staged = target.with_name(target.name + "-new")
-            backup = target.with_name(target.name + "-previous")
             shutil.rmtree(staged, ignore_errors=True)
-            shutil.rmtree(backup, ignore_errors=True)
             shutil.copytree(source_root, staged)
-            if not validator(staged):
-                shutil.rmtree(staged, ignore_errors=True)
-                raise ValueError("The installed files did not pass validation.")
-            if target.exists():
-                target.replace(backup)
-            staged.replace(target)
-            shutil.rmtree(backup, ignore_errors=True)
+            self.replace_installation(staged, target, validator)
+
+    def install_patch_path(self, patches: list[UpdatePatch], asset: Asset, target: Path) -> None:
+        """Overlay one or more small updates and switch folders atomically."""
+        if not patches:
+            return
+        if not target.is_dir():
+            raise ValueError("The previous installation was not found. Install Anki Voice Studio again.")
+        LOCAL_DATA.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="anki-voice-update-", dir=LOCAL_DATA) as temporary_name:
+            temporary = Path(temporary_name)
+            staged = target.with_name(target.name + "-new")
+            shutil.rmtree(staged, ignore_errors=True)
+            shutil.copytree(target, staged)
+            archive_count = sum(len(patch.archives) for patch in patches)
+            archive_index = 0
+            for patch_number, patch in enumerate(patches, start=1):
+                unpacked = temporary / f"patch-{patch_number}"
+                unpacked.mkdir()
+                for source in patch.archives:
+                    archive_index += 1
+                    archive = temporary / f"patch-{archive_index}.zip"
+                    label = patch.label if len(patch.archives) == 1 else f"{patch.label}, part {archive_index}/{archive_count}"
+                    self.download_archive(source, archive, label, archive_index - 1, archive_count)
+                    safe_extract_zip(archive, unpacked)
+                source_root = self.extracted_root(unpacked, patch.root or asset.root)
+                if not source_root.is_dir():
+                    raise ValueError("The downloaded update has an invalid structure.")
+                shutil.copytree(source_root, staged, dirs_exist_ok=True)
+                self.remove_staged_paths(staged, patch.remove)
+            self.replace_installation(staged, target, self.app_is_valid)
 
     def download_archive(self, source: dict[str, Any], destination: Path, label: str, offset: int, total: int) -> None:
         url = valid_https_url(source.get("url"))

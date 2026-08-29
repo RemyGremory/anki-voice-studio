@@ -39,8 +39,10 @@ audio stay on your computer.
      detected and is strongly recommended when available.
 4. Click **Install Anki Voice Studio**.
 5. Afterwards, use the desktop shortcut **Anki Voice Studio**. It checks
-   for an update before starting the program, so a new version does not require
-   reinstalling everything manually.
+   for updates before starting the program. Normal updates download only the
+   small files that changed; the large CPU or NVIDIA components are kept in
+   place. A full download is needed only after a major engine change or when
+   reinstalling the program.
 
 Python, packages, and audio libraries are included in the application build.
 Internet access is needed for the first audio generation because the OmniVoice
