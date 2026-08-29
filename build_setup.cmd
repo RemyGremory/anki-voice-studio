@@ -12,7 +12,7 @@ if not exist "build\specs" mkdir "build\specs"
 echo Creating the small Anki Voice Studio setup launcher.
 ".venv\Scripts\pyinstaller.exe" --noconfirm --clean --onefile --windowed --name "AnkiVoiceStudioSetup" ^
   --specpath "build\specs" ^
-  --icon "%CD%\setup_web\assets\anki-voice-studio.ico" ^
+  --icon "%CD%\setup_web\assets\anki-voice-studio-shortcut.ico" ^
   --add-data "%CD%\bootstrap_manifest.json;." ^
   --add-data "%CD%\setup_web;setup_web" ^
   --collect-data certifi ^
