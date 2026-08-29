@@ -18,7 +18,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
@@ -55,6 +55,17 @@ def wait_for_app(process: subprocess.Popen[bytes], timeout: float = 45) -> dict[
         except OSError:
             time.sleep(0.5)
     raise TimeoutError("The installed app did not open its local page in time.")
+
+
+def close_app() -> None:
+    request = Request(
+        "http://127.0.0.1:8766/api/close",
+        data=b"{}",
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urlopen(request, timeout=2) as response:
+        assert json.loads(response.read().decode("utf-8")) == {"ok": True}
 
 
 def run() -> None:
@@ -110,6 +121,8 @@ def run() -> None:
                 engine = next((item for item in components if item.get("id") == "engine"), {})
                 if not engine.get("ready") or not status.get("ready"):
                     raise AssertionError(f"The installed CPU runtime is not ready: {status}")
+                close_app()
+                process.wait(timeout=10)
             finally:
                 if process.poll() is None:
                     process.terminate()

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "release": {
-    "app_version": "0.1.0-beta",
+    "app_version": "0.1.1-beta",
     "channel": "beta",
     "repository": ""
   },

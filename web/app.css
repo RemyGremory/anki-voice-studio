@@ -76,6 +76,10 @@ textarea { flex: 1 1 auto; min-height: 430px; resize: vertical; padding: 15px; l
 .button-secondary { border-color: var(--line); }
 .button-quiet { background: transparent; border-color: rgba(117, 167, 206, .17); color: #c7d5e8; }
 .mini { padding: 8px 9px; font-size: 11px; white-space: nowrap; }
+.top-navigation { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 18px; }
+.top-navigation .tabbar { margin: 0; }
+.close-app { border-color: rgba(241, 132, 166, .22); color: #e6bbca; }
+.close-app:hover { border-color: rgba(241, 132, 166, .58); background: rgba(184, 70, 111, .13); }
 .file-label input { display: none; }
 .text-button { border: 0; background: transparent; color: var(--cyan); padding: 7px; font-size: 12px; font-weight: 700; }
 .text-button:hover { color: #a4edff; }
@@ -244,8 +248,10 @@ textarea { flex: 1 1 auto; min-height: 430px; resize: vertical; padding: 15px; l
   .cards-actions { flex-wrap: wrap; }
   .sentence-pause-control { align-items: stretch; flex-direction: column; }
   .sentence-pause-control .select { width: 100%; min-width: 0; }
+  .top-navigation { align-items: flex-start; }
   .tabbar { width: 100%; }
   .tab { flex: 1 0 auto; font-size: 11px; padding: 9px 10px; }
+  .close-app { padding: 9px; }
   .studio-text { min-height: 280px; }
   .voice-traits-grid { grid-template-columns: 1fr; }
   .voice-tag-group-wide { grid-column: auto; }

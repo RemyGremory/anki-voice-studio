@@ -41,7 +41,7 @@ def wait_for_setup(process: subprocess.Popen[bytes], timeout: float = 20) -> Non
             assert setup_logo.startswith(b"<svg")
             assert setup_icon.startswith(b"\x00\x00\x01\x00")
             assert status["release_ready"] is True
-            assert status["version"] == "0.1.0"
+            assert status["version"] == "0.1.1"
             return
         except OSError:
             time.sleep(0.25)

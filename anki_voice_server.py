@@ -1551,7 +1551,7 @@ def run_generation(job: Job, payload: dict[str, Any]) -> dict[str, Any]:
 
 
 class RequestHandler(BaseHTTPRequestHandler):
-    server_version = "AnkiVoiceStudio/0.1"
+    server_version = "AnkiVoiceStudio/0.1.1"
 
     def log_message(self, *_args: Any) -> None:
         return

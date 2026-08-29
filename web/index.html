@@ -23,7 +23,6 @@
           <button id="localeRu" class="locale-button" type="button" aria-pressed="false">RU</button>
         </div>
         <div class="hero-note" data-i18n-html="hero_note">No cloud<br>or subscriptions</div>
-        <button id="closeApp" class="button button-quiet mini close-app" type="button" data-i18n="close_app">Close app</button>
       </div>
     </header>
 
@@ -34,11 +33,14 @@
       <button id="installComponents" class="button button-primary mini" disabled data-i18n="download_on_release">Download available with release</button>
     </section>
 
-    <nav class="tabbar" aria-label="App sections" data-i18n-aria="sections_label">
-      <button class="tab active" data-view="cards" data-i18n="tab_cards">New cards</button>
-      <button class="tab" data-view="studio" data-i18n="tab_studio">Voice studio</button>
-      <button class="tab" data-view="anki" data-i18n="tab_anki">Cards from Anki</button>
-    </nav>
+    <div class="top-navigation">
+      <nav class="tabbar" aria-label="App sections" data-i18n-aria="sections_label">
+        <button class="tab active" data-view="cards" data-i18n="tab_cards">New cards</button>
+        <button class="tab" data-view="studio" data-i18n="tab_studio">Voice studio</button>
+        <button class="tab" data-view="anki" data-i18n="tab_anki">Cards from Anki</button>
+      </nav>
+      <button id="closeApp" class="button button-quiet mini close-app" type="button" data-i18n="close_app">Close app</button>
+    </div>
 
     <section id="view-cards" class="view active">
       <section class="intro-strip"><span class="intro-icon">✦</span><p data-i18n-html="cards_intro">Paste a list, choose voice profiles, and create a CSV with MP3 files. Examples are spoken only up to <b>—</b>, without the Russian translation.</p></section>
