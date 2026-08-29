@@ -87,6 +87,11 @@ def run() -> None:
             setup.LOCAL_DATA = temporary / "installed-data"
             setup.APP_INSTALL_DIR = setup.LOCAL_DATA / "app"
             setup.STATE_PATH = setup.LOCAL_DATA / "setup_state.json"
+            custom_parent = temporary / "chosen-location"
+            custom_parent.mkdir()
+            custom_target, saved_parent = setup.install_target(str(custom_parent))
+            assert custom_target == custom_parent / "Anki Voice Studio"
+            assert saved_parent == str(custom_parent.resolve())
             reports: list[tuple[str, int | None]] = []
             installer = setup.Installer(lambda message, progress: reports.append((message, progress)))
 
@@ -95,7 +100,9 @@ def run() -> None:
             first_result = installer.install(first_manifest, "cpu")
             executable = Path(first_result["executable"])
             assert executable.read_text(encoding="utf-8") == "test release 1"
-            assert json.loads(setup.STATE_PATH.read_text(encoding="utf-8"))["version"] == "0.0.1-test"
+            first_state = json.loads(setup.STATE_PATH.read_text(encoding="utf-8"))
+            assert first_state["version"] == "0.0.1-test"
+            assert first_state["install_path"] == str(setup.APP_INSTALL_DIR.resolve())
             assert any(progress and progress > 0 for _, progress in reports)
 
             second_asset["archives"][0]["url"] = f"{base_url}/{second_archive.name}"

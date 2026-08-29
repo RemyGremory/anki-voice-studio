@@ -1065,6 +1065,9 @@ class StudioState:
     def get_job(self, job_id: str) -> Job | None:
         return self.jobs.get(job_id)
 
+    def has_active_job(self) -> bool:
+        return any(job.state == "running" for job in self.jobs.values())
+
 
 STATE = StudioState()
 
@@ -1642,6 +1645,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if not folder.is_dir() or not any(root in (folder, *folder.parents) for root in permitted_roots):
                     raise ValueError("Можно открыть только папку результата этой программы.")
                 os.startfile(str(folder))
+                return self.send_json({"ok": True})
+            if parsed.path == "/api/close":
+                if STATE.has_active_job():
+                    raise ValueError("Wait until audio creation finishes before closing Anki Voice Studio.")
+                threading.Timer(0.2, self.server.shutdown).start()
                 return self.send_json({"ok": True})
             return self.send_error_json(HTTPStatus.NOT_FOUND, "Неизвестная команда.")
         except ValueError as error:

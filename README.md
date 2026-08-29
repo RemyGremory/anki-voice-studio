@@ -7,6 +7,12 @@ profiles, generate MP3 files for new vocabulary cards, and add audio to
 existing Anki notes. Your card texts, voice samples, profiles, and generated
 audio stay on your computer.
 
+> **Important: CPU generation is slow.** The Compact CPU edition is a
+> compatibility fallback, not an option for weak PCs. Creating roughly ten
+> seconds of audio can take about a minute and noticeably load the processor;
+> the exact speed varies by computer. If a compatible NVIDIA graphics card is
+> available, choose **Faster NVIDIA** — it is the recommended edition.
+
 > For card design and review controls, see the
 > [Anki Card Template](https://github.com/RemyGremory/anki-card-template).
 
@@ -27,10 +33,12 @@ audio stay on your computer.
 1. Open the [latest release](https://github.com/RemyGremory/anki-voice-studio/releases/latest).
 2. Download **`AnkiVoiceStudioSetup.exe`** — do not download the source-code ZIP.
 3. Run it and choose the recommended edition:
-   - **Compact CPU** works on every Windows PC.
-   - **Faster NVIDIA** is offered when a supported NVIDIA graphics card is detected.
+   - **Compact CPU** works on every Windows PC, but generation is slow and it
+     is not recommended for weak computers.
+   - **Faster NVIDIA** is offered when a supported NVIDIA graphics card is
+     detected and is strongly recommended when available.
 4. Click **Install Anki Voice Studio**.
-5. Afterwards, use the desktop shortcut **Anki Voice Studio Setup**. It checks
+5. Afterwards, use the desktop shortcut **Anki Voice Studio**. It checks
    for an update before starting the program, so a new version does not require
    reinstalling everything manually.
 

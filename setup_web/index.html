@@ -24,7 +24,8 @@
 
     <section class="card" id="installCard">
       <div class="section-heading"><span>01</span><div><h2>Choose installation mode</h2><p id="gpuText">Checking this computer…</p></div></div>
-      <label class="choice" id="cpuChoice"><input type="radio" name="edition" value="cpu"><span><strong>Compact CPU</strong><small>Works on every Windows PC.</small></span></label>
+      <div class="choice"><span style="flex:1"><strong>Install location</strong><small id="installLocation">Checking the default location…</small></span><button class="secondary" id="chooseLocation">Choose folder</button></div>
+      <label class="choice" id="cpuChoice"><input type="radio" name="edition" value="cpu"><span><strong>Compact CPU</strong><small>Works on every Windows PC, but generation is slow.</small></span></label>
       <label class="choice" id="nvidiaChoice"><input type="radio" name="edition" value="nvidia"><span><strong>Faster NVIDIA</strong><small>Uses a supported NVIDIA graphics card.</small></span></label>
       <div class="progress-wrap" hidden id="progressWrap"><div class="progress"><i id="progressBar"></i></div><span id="progressValue">0%</span></div>
       <button class="primary" id="installButton" disabled>Install Anki Voice Studio</button>

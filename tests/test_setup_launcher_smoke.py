@@ -36,6 +36,8 @@ def wait_for_setup(process: subprocess.Popen[bytes], timeout: float = 20) -> Non
             with urlopen("http://127.0.0.1:8767/assets/anki-voice-studio.ico", timeout=2) as response:
                 setup_icon = response.read()
             assert "Choose installation mode" in page
+            assert "Choose folder" in page
+            assert "generation is slow" in page
             assert setup_logo.startswith(b"<svg")
             assert setup_icon.startswith(b"\x00\x00\x01\x00")
             assert status["release_ready"] is True
@@ -89,6 +91,7 @@ def run() -> None:
         raise RuntimeError("Port 8767 is already in use. Close Anki Voice Studio Setup before the smoke test.")
     environment = os.environ.copy()
     environment["ANKI_VOICE_NO_BROWSER"] = "1"
+    environment["ANKI_VOICE_SKIP_SHORTCUT"] = "1"
     process = subprocess.Popen([str(SETUP_EXE)], cwd=str(SETUP_EXE.parent), env=environment)
     try:
         wait_for_setup(process)

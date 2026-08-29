@@ -103,6 +103,44 @@ def find_nvidia_gpu() -> str:
     return ""
 
 
+def choose_install_parent() -> str:
+    """Open the standard Windows folder picker for an optional app location."""
+    script = (
+        "$shell=New-Object -ComObject Shell.Application;"
+        "$folder=$shell.BrowseForFolder(0,'Choose where to install Anki Voice Studio',0x00000041,0);"
+        "if($folder){$folder.Self.Path}"
+    )
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-STA", "-Command", script],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        return as_text(result.stdout)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def install_target(install_parent: str) -> tuple[Path, str]:
+    """Return the exact folder used for an installation.
+
+    The default remains Local AppData. For a custom location, the user picks a
+    parent folder and the program creates an Anki Voice Studio folder in it.
+    """
+    parent = as_text(install_parent)
+    if not parent:
+        return APP_INSTALL_DIR.resolve(), ""
+    candidate = Path(parent).expanduser()
+    if not candidate.is_absolute():
+        raise ValueError("Choose an absolute Windows folder for the installation.")
+    candidate = candidate.resolve()
+    if not candidate.is_dir():
+        raise ValueError("The selected installation location no longer exists.")
+    return candidate / APP_NAME, str(candidate)
+
+
 def safe_extract_zip(archive: Path, destination: Path) -> None:
     destination = destination.resolve()
     with zipfile.ZipFile(archive) as package:
@@ -192,7 +230,14 @@ class Installer:
             return fallback
         raise ValueError("Release links are not published yet. The setup app has nothing to download.")
 
-    def install(self, manifest: dict[str, Any], edition: str) -> dict[str, str]:
+    def install(
+        self,
+        manifest: dict[str, Any],
+        edition: str,
+        target: Path | None = None,
+        install_parent: str = "",
+    ) -> dict[str, str]:
+        target = (target or APP_INSTALL_DIR).resolve()
         assets = manifest.get("assets") if isinstance(manifest.get("assets"), dict) else {}
         app_asset = parse_asset(edition, assets.get(edition))
         if not app_asset.configured:
@@ -200,17 +245,19 @@ class Installer:
 
         local_state = read_json(STATE_PATH)
         remote_version = as_text(manifest.get("version"))
-        app_needed = not self.app_is_installed(local_state, edition) or local_state.get("version") != remote_version
+        app_needed = not self.app_is_installed(local_state, edition, target) or local_state.get("version") != remote_version
 
         if app_needed:
             self.report("Downloading Anki Voice Studio…", 0)
-            self.install_asset(app_asset, APP_INSTALL_DIR, self.app_is_valid)
+            self.install_asset(app_asset, target, self.app_is_valid)
 
-        executable = self.find_executable(app_asset)
+        executable = self.find_executable(app_asset, target)
         state = {
             "version": remote_version,
             "edition": edition,
             "executable": str(executable),
+            "install_path": str(target),
+            "install_parent": install_parent,
             "installed_at": int(time.time()),
         }
         write_json(STATE_PATH, state)
@@ -218,19 +265,21 @@ class Installer:
         self.report("Ready.", 100)
         return {"version": remote_version, "edition": edition, "executable": str(executable)}
 
-    def app_is_installed(self, state: dict[str, Any], edition: str) -> bool:
+    def app_is_installed(self, state: dict[str, Any], edition: str, target: Path) -> bool:
         executable = Path(as_text(state.get("executable")))
-        return state.get("edition") == edition and executable.is_file() and APP_INSTALL_DIR.is_dir()
+        saved_path = as_text(state.get("install_path"))
+        saved_target = Path(saved_path).resolve() if saved_path else APP_INSTALL_DIR.resolve()
+        return state.get("edition") == edition and saved_target == target and executable.is_file() and target.is_dir()
 
     def app_is_valid(self, folder: Path) -> bool:
         return any(path.is_file() and path.suffix.casefold() == ".exe" for path in folder.rglob("*.exe"))
 
-    def find_executable(self, asset: Asset) -> Path:
+    def find_executable(self, asset: Asset, target: Path) -> Path:
         if asset.executable:
-            candidate = APP_INSTALL_DIR / asset.executable
+            candidate = target / asset.executable
             if candidate.is_file():
                 return candidate
-        candidates = sorted(APP_INSTALL_DIR.rglob("*.exe"))
+        candidates = sorted(target.rglob("*.exe"))
         if not candidates:
             raise ValueError("The app executable was not found after installation.")
         return candidates[0]
@@ -246,19 +295,25 @@ class Installer:
             return
         try:
             setup_copy = LOCAL_DATA / "Anki Voice Studio Setup.exe"
+            shortcut_icon = LOCAL_DATA / "Anki Voice Studio.ico"
             current_setup = Path(sys.executable).resolve()
             if current_setup != setup_copy.resolve():
                 temporary = setup_copy.with_suffix(".new.exe")
                 shutil.copy2(current_setup, temporary)
                 temporary.replace(setup_copy)
+            bundled_icon = SETUP_WEB_DIR / "assets" / "anki-voice-studio-shortcut.ico"
+            if bundled_icon.is_file():
+                shutil.copy2(bundled_icon, shortcut_icon)
             environment = os.environ.copy()
             environment["AVS_SETUP_PATH"] = str(setup_copy)
             environment["AVS_SETUP_DIR"] = str(LOCAL_DATA)
+            environment["AVS_SHORTCUT_ICON"] = str(shortcut_icon)
             script = (
                 "$desktop=[Environment]::GetFolderPath('Desktop');"
                 "$link=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $desktop 'Anki Voice Studio.lnk'));"
                 "$link.TargetPath=$env:AVS_SETUP_PATH;"
                 "$link.WorkingDirectory=$env:AVS_SETUP_DIR;"
+                "$link.IconLocation=($env:AVS_SHORTCUT_ICON + ',0');"
                 "$link.Description='Open and update Anki Voice Studio';"
                 "$link.Save()"
             )
@@ -359,7 +414,10 @@ class SetupState:
 
         def worker() -> None:
             try:
-                manifest = Installer(self.report).bootstrap()
+                installer = Installer(self.report)
+                manifest = installer.bootstrap()
+                if not os.environ.get("ANKI_VOICE_SKIP_SHORTCUT"):
+                    installer.ensure_setup_shortcut()
                 with self.lock:
                     self.manifest = manifest
                     self.message = "Ready to install the recommended edition."
@@ -387,6 +445,8 @@ class SetupState:
         installed_ok = bool(edition) and executable.is_file()
         remote_version = as_text(manifest.get("version")) if manifest else ""
         installed_version = as_text(installed.get("version"))
+        install_path = as_text(installed.get("install_path")) or str(APP_INSTALL_DIR)
+        install_parent = as_text(installed.get("install_parent"))
         assets = manifest.get("assets") if isinstance(manifest, dict) and isinstance(manifest.get("assets"), dict) else {}
         available = {key: parse_asset(key, assets.get(key)).configured for key in ("cpu", "nvidia")}
         update_available = bool(installed_ok and remote_version and is_newer(remote_version, installed_version))
@@ -403,14 +463,17 @@ class SetupState:
             "installed": installed_ok,
             "installed_edition": edition,
             "installed_version": installed_version,
+            "install_path": install_path,
+            "install_parent": install_parent,
             "current": current,
             "update_available": update_available,
         }
 
-    def install(self, edition: str) -> None:
+    def install(self, edition: str, install_parent: str = "") -> None:
         edition = as_text(edition).casefold()
         if edition not in {"cpu", "nvidia"}:
             raise ValueError("Choose the CPU or NVIDIA edition.")
+        target, selected_parent = install_target(install_parent)
         with self.lock:
             if self.working:
                 raise ValueError("The setup is already working.")
@@ -423,7 +486,7 @@ class SetupState:
 
         def worker() -> None:
             try:
-                Installer(self.report).install(manifest, edition)
+                Installer(self.report).install(manifest, edition, target, selected_parent)
                 with self.lock:
                     self.message = "Installation is complete. Open Anki Voice Studio."
                     self.progress = 100
@@ -479,8 +542,10 @@ class SetupHandler(BaseHTTPRequestHandler):
         try:
             data = self.read_json()
             if path == "/api/install":
-                STATE.install(as_text(data.get("edition")))
+                STATE.install(as_text(data.get("edition")), as_text(data.get("install_parent")))
                 return self.send_json({"ok": True})
+            if path == "/api/pick-install-location":
+                return self.send_json({"path": choose_install_parent()})
             if path == "/api/refresh":
                 STATE.refresh()
                 return self.send_json({"ok": True})
