@@ -1,5 +1,45 @@
 {
   "schema": 1,
   "app_name": "Anki Voice Studio",
-  "release_manifest_url": "https://raw.githubusercontent.com/RemyGremory/anki-voice-studio/main/release_manifest.json"
+  "release_manifest_url": "https://raw.githubusercontent.com/RemyGremory/anki-voice-studio/main/release_manifest.json",
+  "release_manifest": {
+    "schema": 1,
+    "version": "0.1.0",
+    "assets": {
+      "cpu": {
+        "label": "Anki Voice Studio — Compact CPU",
+        "root": "AnkiVoiceStudio-CPU",
+        "executable": "AnkiVoiceStudio-CPU.exe",
+        "archives": [
+          {
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.0/AnkiVoiceStudio-CPU.zip",
+            "sha256": "7cf54dd0e67ee3a175d3f51344191b974e5b36022446a751c60d7e2dd5edee3a",
+            "size": 873921297
+          }
+        ]
+      },
+      "nvidia": {
+        "label": "Anki Voice Studio — Faster NVIDIA",
+        "root": "AnkiVoiceStudio-NVIDIA",
+        "executable": "AnkiVoiceStudio-NVIDIA.exe",
+        "archives": [
+          {
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.0/AnkiVoiceStudio-NVIDIA-part-01.zip",
+            "sha256": "779e80455ec2021c93470678e8dd201b0354b72c82f07d24353439b2d7789b57",
+            "size": 1518415619
+          },
+          {
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.0/AnkiVoiceStudio-NVIDIA-part-02.zip",
+            "sha256": "044b5ae2fcee6a7ff5b598c54be5e6baa557768ea907eeee9f34b9f74f00ceac",
+            "size": 1842277304
+          },
+          {
+            "url": "https://github.com/RemyGremory/anki-voice-studio/releases/download/v0.1.0/AnkiVoiceStudio-NVIDIA-part-03.zip",
+            "sha256": "f4064b48f3f8fd72337589cdfbbdb38bd03f1314ddd5ee869e065669d7442b64",
+            "size": 1720025404
+          }
+        ]
+      }
+    }
+  }
 }

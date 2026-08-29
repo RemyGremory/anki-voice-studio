@@ -14,6 +14,7 @@ import mimetypes
 import os
 import re
 import shutil
+import ssl
 import subprocess
 import sys
 import tempfile
@@ -22,6 +23,7 @@ import time
 import traceback
 import webbrowser
 import zipfile
+import certifi
 from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -65,15 +67,21 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
 def valid_https_url(value: Any) -> str:
     url = as_text(value)
     if not url.startswith("https://"):
-        raise ValueError("Источник загрузки должен использовать HTTPS.")
+        raise ValueError("The download source must use HTTPS.")
     return url
 
 
 def sha256_is_valid(value: Any) -> str:
     digest = as_text(value).lower()
     if not re.fullmatch(r"[a-f0-9]{64}", digest):
-        raise ValueError("У файла нет корректной контрольной суммы SHA-256.")
+        raise ValueError("The file does not have a valid SHA-256 checksum.")
     return digest
+
+
+def open_https(request: Request, timeout: int) -> Any:
+    """Open an HTTPS request with a bundled, current certificate store."""
+    context = ssl.create_default_context(cafile=certifi.where())
+    return urlopen(request, timeout=timeout, context=context)
 
 
 def find_nvidia_gpu() -> str:
@@ -101,7 +109,7 @@ def safe_extract_zip(archive: Path, destination: Path) -> None:
         for item in package.infolist():
             target = (destination / item.filename).resolve()
             if destination not in (target, *target.parents):
-                raise ValueError("Архив содержит недопустимый путь.")
+                raise ValueError("The archive contains an unsafe file path.")
             if item.is_dir():
                 target.mkdir(parents=True, exist_ok=True)
                 continue
@@ -167,30 +175,35 @@ class Installer:
     def bootstrap(self) -> dict[str, Any]:
         config = read_json(BOOTSTRAP_MANIFEST_PATH)
         url = as_text(config.get("release_manifest_url"))
-        if not url:
-            raise ValueError("Ссылки на релиз ещё не опубликованы. Установщик готов, но скачивать пока нечего.")
-        request = Request(valid_https_url(url), headers={"User-Agent": "AnkiVoiceStudioSetup"})
-        try:
-            with urlopen(request, timeout=20) as response:
-                data = json.loads(response.read().decode("utf-8"))
-        except (URLError, TimeoutError, OSError, json.JSONDecodeError) as error:
-            raise ValueError("Не удалось получить информацию о новом релизе.") from error
-        if not isinstance(data, dict) or not isinstance(data.get("assets"), dict):
-            raise ValueError("Файл релиза имеет неверный формат.")
-        return data
+        fallback = config.get("release_manifest")
+        fallback = fallback if isinstance(fallback, dict) and isinstance(fallback.get("assets"), dict) else None
+        if url:
+            request = Request(valid_https_url(url), headers={"User-Agent": "AnkiVoiceStudioSetup"})
+            try:
+                with open_https(request, timeout=20) as response:
+                    data = json.loads(response.read().decode("utf-8"))
+                if not isinstance(data, dict) or not isinstance(data.get("assets"), dict):
+                    raise ValueError("The release manifest has an invalid format.")
+                return data
+            except (URLError, TimeoutError, OSError, json.JSONDecodeError, ValueError) as error:
+                if fallback is None:
+                    raise ValueError("Unable to check release information.") from error
+        if fallback is not None:
+            return fallback
+        raise ValueError("Release links are not published yet. The setup app has nothing to download.")
 
     def install(self, manifest: dict[str, Any], edition: str) -> dict[str, str]:
         assets = manifest.get("assets") if isinstance(manifest.get("assets"), dict) else {}
         app_asset = parse_asset(edition, assets.get(edition))
         if not app_asset.configured:
-            raise ValueError("Для выбранной версии программа ещё не опубликована.")
+            raise ValueError("The selected edition is not published yet.")
 
         local_state = read_json(STATE_PATH)
         remote_version = as_text(manifest.get("version"))
         app_needed = not self.app_is_installed(local_state, edition) or local_state.get("version") != remote_version
 
         if app_needed:
-            self.report("Скачиваю программу…", 0)
+            self.report("Downloading Anki Voice Studio…", 0)
             self.install_asset(app_asset, APP_INSTALL_DIR, self.app_is_valid)
 
         executable = self.find_executable(app_asset)
@@ -202,7 +215,7 @@ class Installer:
         }
         write_json(STATE_PATH, state)
         self.ensure_setup_shortcut()
-        self.report("Готово.", 100)
+        self.report("Ready.", 100)
         return {"version": remote_version, "edition": edition, "executable": str(executable)}
 
     def app_is_installed(self, state: dict[str, Any], edition: str) -> bool:
@@ -219,7 +232,7 @@ class Installer:
                 return candidate
         candidates = sorted(APP_INSTALL_DIR.rglob("*.exe"))
         if not candidates:
-            raise ValueError("После установки не найден файл программы.")
+            raise ValueError("The app executable was not found after installation.")
         return candidates[0]
 
     def ensure_setup_shortcut(self) -> None:
@@ -268,14 +281,14 @@ class Installer:
             unpacked.mkdir()
             archive_count = len(asset.archives)
             for index, source in enumerate(asset.archives, start=1):
-                label = asset.label if archive_count == 1 else f"{asset.label}, часть {index}/{archive_count}"
+                label = asset.label if archive_count == 1 else f"{asset.label}, part {index}/{archive_count}"
                 archive = temporary / f"asset-{index}.zip"
                 self.download_archive(source, archive, label, index - 1, archive_count)
                 safe_extract_zip(archive, unpacked)
 
             source_root = unpacked / asset.root if asset.root else unpacked
             if not source_root.is_dir() or not validator(source_root):
-                raise ValueError("Скачанные файлы неполные или имеют неверную структуру.")
+                raise ValueError("The downloaded files are incomplete or have an invalid structure.")
             staged = target.with_name(target.name + "-new")
             backup = target.with_name(target.name + "-previous")
             shutil.rmtree(staged, ignore_errors=True)
@@ -283,7 +296,7 @@ class Installer:
             shutil.copytree(source_root, staged)
             if not validator(staged):
                 shutil.rmtree(staged, ignore_errors=True)
-                raise ValueError("Проверка установленных файлов не пройдена.")
+                raise ValueError("The installed files did not pass validation.")
             if target.exists():
                 target.replace(backup)
             staged.replace(target)
@@ -297,7 +310,7 @@ class Installer:
         received = 0
         request = Request(url, headers={"User-Agent": "AnkiVoiceStudioSetup"})
         try:
-            with urlopen(request, timeout=30) as response, destination.open("wb") as output:
+            with open_https(request, timeout=30) as response, destination.open("wb") as output:
                 response_size = int(response.headers.get("Content-Length", "0") or 0)
                 total_size = expected_size or response_size
                 while True:
@@ -312,11 +325,11 @@ class Installer:
                     size_note = f" {file_size(received)}" if received else ""
                     self.report(f"{label}{size_note}", progress)
         except (URLError, TimeoutError, OSError) as error:
-            raise ValueError("Не удалось скачать компонент. Проверь подключение к интернету и попробуй ещё раз.") from error
+            raise ValueError("Unable to download a component. Check your internet connection and try again.") from error
         if expected_size and received != expected_size:
-            raise ValueError("Размер скачанного файла не совпал с ожидаемым.")
+            raise ValueError("The downloaded file size does not match the expected size.")
         if digest.hexdigest().lower() != expected_hash:
-            raise ValueError("Контрольная сумма скачанного файла не совпала.")
+            raise ValueError("The downloaded file checksum does not match.")
 
 
 class SetupState:
@@ -429,8 +442,11 @@ class SetupState:
         if not executable.is_file():
             raise ValueError("Anki Voice Studio is not installed yet.")
         os.startfile(str(executable))
+        self.close()
+
+    def close(self) -> None:
         if self.server:
-            threading.Timer(0.7, self.server.shutdown).start()
+            threading.Timer(0.2, self.server.shutdown).start()
 
 
 STATE = SetupState()
@@ -470,6 +486,9 @@ class SetupHandler(BaseHTTPRequestHandler):
                 return self.send_json({"ok": True})
             if path == "/api/launch":
                 STATE.launch()
+                return self.send_json({"ok": True})
+            if path == "/api/close":
+                STATE.close()
                 return self.send_json({"ok": True})
             return self.send_error(HTTPStatus.NOT_FOUND)
         except ValueError as error:

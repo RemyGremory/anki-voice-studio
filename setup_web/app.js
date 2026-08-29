@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let snapshot = null;
+let closing = false;
 
 async function request(path, payload) {
   const response = await fetch(path, payload ? {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)} : undefined);
@@ -37,14 +38,30 @@ function setStatus(data) {
   if (progress !== null) { $("progressBar").style.width = `${progress}%`; $("progressValue").textContent = `${progress}%`; }
   $("installButton").disabled = !ready || active || current || !data.available?.[selectedEdition()];
   $("installButton").textContent = data.update_available ? "Install update" : "Install Anki Voice Studio";
+  $("closeButton").disabled = active;
+  $("closeButton").textContent = active ? "Installing…" : "Close setup";
   $("launchCard").hidden = !data.installed;
   $("launchText").textContent = data.current ? "Everything is up to date." : "A previous version is installed.";
 }
 
-async function refresh() { try { setStatus(await request("/api/status")); } catch (error) { $("statusText").textContent = error.message; } }
+async function refresh() { if (closing) return; try { setStatus(await request("/api/status")); } catch (error) { $("statusText").textContent = error.message; } }
 $("refreshButton").onclick = async () => { try { await request("/api/refresh", {}); } finally { refresh(); } };
 $("installButton").onclick = async () => { try { await request("/api/install", {edition: selectedEdition()}); } catch (error) { alert(error.message); } finally { refresh(); } };
 $("launchButton").onclick = async () => { try { await request("/api/launch", {}); } catch (error) { alert(error.message); } };
+$("closeButton").onclick = async () => {
+  closing = true;
+  try {
+    await request("/api/close", {});
+    $("statusIcon").textContent = "✓";
+    $("statusTitle").textContent = "Setup closed";
+    $("statusText").textContent = "You can close this browser tab.";
+    $("closeButton").disabled = true;
+    window.setTimeout(() => window.close(), 350);
+  } catch (error) {
+    closing = false;
+    $("statusText").textContent = error.message;
+  }
+};
 document.querySelectorAll('input[name="edition"]').forEach((item) => item.onchange = () => setStatus(snapshot || {}));
 refresh();
 setInterval(refresh, 900);

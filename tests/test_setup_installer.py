@@ -111,7 +111,7 @@ def run() -> None:
             try:
                 installer.install({"version": "0.0.3-test", "assets": {"cpu": wrong_hash}}, "cpu")
             except ValueError as error:
-                assert "контрольная сумма" in str(error).casefold()
+                assert "checksum" in str(error).casefold()
             else:
                 raise AssertionError("Installer accepted an archive with the wrong SHA-256.")
             assert executable.read_text(encoding="utf-8") == "test release 2"

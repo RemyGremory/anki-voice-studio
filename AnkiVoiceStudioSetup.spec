@@ -1,11 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_data_files
+
+datas = [('bootstrap_manifest.json', '.'), ('setup_web', 'setup_web')]
+datas += collect_data_files('certifi')
 
 
 a = Analysis(
     ['anki_voice_setup.py'],
     pathex=[],
     binaries=[],
-    datas=[('bootstrap_manifest.json', '.'), ('setup_web', 'setup_web')],
+    datas=datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>Anki Voice Studio Setup</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/anki-voice-studio.svg">
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
   <main class="shell">
     <header class="hero">
-      <div class="mark">AV</div>
+      <div class="mark"><img src="/assets/anki-voice-studio.svg" alt=""></div>
       <div><p class="eyebrow">LOCAL • OMNIVOICE</p><h1>Anki Voice Studio</h1><p>Setup and updates — no Python or manual modules.</p></div>
     </header>
 
@@ -18,6 +19,7 @@
       <div class="status-icon" id="statusIcon">◌</div>
       <div><strong id="statusTitle">Checking release information…</strong><p id="statusText">The setup is checking what this computer needs.</p></div>
       <button class="secondary" id="refreshButton">Refresh</button>
+      <button class="secondary" id="closeButton">Close setup</button>
     </section>
 
     <section class="card" id="installCard">

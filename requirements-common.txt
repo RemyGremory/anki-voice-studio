@@ -2,3 +2,4 @@
 omnivoice
 lameenc
 imageio-ffmpeg
+certifi
