@@ -34,15 +34,26 @@ audio stay on your computer.
 
 ### Windows 10/11
 
-1. Open the [latest release](https://github.com/RemyGremory/anki-voice-studio/releases/latest).
-2. Download **`AnkiVoiceStudioSetup.exe`** — do not download the source-code ZIP.
-3. Run it and choose the recommended edition:
+1. Open the [Releases page](https://github.com/RemyGremory/anki-voice-studio/releases)
+   and open the newest release. A release marked **Pre-release** is a testing
+   version; use it only if you are comfortable reporting any problems.
+2. Download **`AnkiVoiceStudioSetup.exe`**. Do not download **Source code
+   (zip)** or the large CPU/NVIDIA ZIP files: the setup app selects and
+   downloads the right edition for you.
+3. Run `AnkiVoiceStudioSetup.exe`. Windows may show a SmartScreen warning for
+   this new unsigned app. Continue only if you downloaded the file from the
+   official Releases page above; then choose **More info → Run anyway**.
+4. In the setup app, use **Choose folder** if you want a different installation
+   location. Then choose an edition:
    - **Compact CPU** works on every Windows PC, but generation is slow and it
      is not recommended for weak computers.
    - **Faster NVIDIA** is offered when a supported NVIDIA graphics card is
      detected and is strongly recommended when available.
-4. Click **Install Anki Voice Studio**.
-5. Afterwards, use the desktop shortcut **Anki Voice Studio**. It checks
+5. Click **Install Anki Voice Studio** and wait for the download and
+   installation to finish. The NVIDIA edition is large, so its first download
+   can take a while.
+6. Afterwards, start the program with the desktop shortcut **Anki Voice
+   Studio**. It checks
    for updates before starting the program. Normal updates download only the
    small files that changed; the large CPU or NVIDIA components are kept in
    place. A full download is needed only after a major engine change or when
@@ -53,24 +64,58 @@ Internet access is needed for the first audio generation because the OmniVoice
 model is downloaded then. Keep roughly 8 GB of free space available for the
 application, voice model, and your generated files.
 
+## First start
+
+1. Open the desktop shortcut and wait for the app to check its components.
+   If a **Download components** button appears, click it and wait until the
+   app reports that the components are ready.
+2. Use the **EN / RU** buttons in the top-right corner to choose the interface
+   language.
+3. Choose one of the three tabs: **New cards**, **Voice studio**, or
+   **Cards from Anki**.
+4. Leave the app open while it creates audio or downloads a model. When you
+   finish, click **Close app** at the top of the window — closing the browser
+   tab alone does not stop the program.
+
 ## Create new cards with audio
 
-1. Open **New cards**.
-2. Paste a list of cards or use the included example.
-3. Choose what to voice: **Word**, **Translation**, and/or **Examples**.
-4. Choose languages and saved voice profiles. Use **Preview voice** before a
-   large generation.
-5. Click **Create MP3 and CSV**.
-6. Import the resulting `anki_cards.csv` into Anki.
-7. Return to the fourth panel, **Add audio to Anki**, and confirm that you
-   imported the cards. The program then copies the generated MP3 files into the
-   selected Anki profile automatically.
-8. Sync Anki normally to make the audio available on a phone.
+1. If you use the companion template, install the
+   [Anki Card Template](https://github.com/RemyGremory/anki-card-template)
+   first. It creates the audio fields used by the CSV.
+2. Open **New cards**. Paste a JSON list of cards, open a `.json`, `.txt`, or
+   `.py` list file, or click **Load example**. Each card needs a word and a
+   translation. The program accepts either `Word` / `Translation` or `Front` /
+   `Back` field names. For example:
 
-For the full interactive card experience, install the
-[Anki Card Template](https://github.com/RemyGremory/anki-card-template) first.
-It adds the `AudioWord`, `AudioTranslation`, and `AudioExample` fields and the
-controls for recorded audio.
+   ```json
+   [{
+     "Word": "outcome",
+     "Translation": "итог, результат",
+     "Explanation": "A result or effect of an action or event.",
+     "Examples": "We are waiting for the outcome of the election."
+   }]
+   ```
+
+3. Click **Validate list**. Fix any reported missing `Word`/`Front` or
+   `Translation`/`Back` fields before continuing.
+4. Choose what to voice: **Word**, **Translation**, and/or **Examples**. Pick
+   the language and either a saved profile or **Automatic voice** for each
+   choice. Use **Preview voice** before a large generation.
+5. Click **Create MP3 and CSV**. Keep the app open until the progress panel
+   finishes.
+6. Click **Open folder** when the result appears. In Anki Desktop, choose
+   **File → Import**, select `anki_cards.csv`, choose the same note type that
+   has the matching fields, check the column mapping, and import the cards.
+7. A fourth panel, **Add audio to Anki**, appears in the **New cards** tab
+   after the files are created. Choose the correct Anki profile, then click
+   **I imported cards — add audio**. The program copies the MP3 files to that
+   profile.
+8. Click **Sync** in Anki to make the cards and audio available on your phone
+   or other devices.
+
+Example audio is generated from the part of each example before an em dash
+(`—`). Put a translation after that dash if you want it to appear on the card
+but not be spoken.
 
 ## Add audio to existing Anki cards
 
@@ -78,20 +123,35 @@ This mode needs the free AnkiConnect add-on. Install it only on the Windows
 computer where you run Anki Voice Studio and Anki Desktop.
 
 1. In Anki Desktop, choose **Tools → Add-ons → Get Add-ons…**.
-2. Enter `2055492159` and restart Anki.
-3. In Voice Studio, open **Cards from Anki** and click **Check connection**.
-4. Select a deck or select one or more notes in Anki Browse.
-5. Enable the fields to update, preview the voices, and click **Add audio to
-   Anki**.
+2. Enter `2055492159`, confirm, then restart Anki. Keep Anki Desktop open.
+3. Make sure the note type has the `AudioWord` and `AudioTranslation` fields;
+   add `AudioExample` too if you want spoken examples.
+4. In Voice Studio, open **Cards from Anki** and click **Check connection**.
+5. Choose **Whole deck** and select a deck, or open **Browse** in Anki, select
+   one or more notes, then choose **Selected in Browse** in Voice Studio.
+6. Click **Find cards**. Enable the fields you want to voice, choose languages
+   and voices, and use **Preview voice** to check them.
+7. Leave **Replace audio in the enabled fields** selected only when you want to
+   overwrite existing recordings. Click **Add audio to Anki** and wait for it
+   to finish.
+8. Click **Sync** in Anki to send the new audio to your phone or other devices.
 
-Nothing extra is needed on iPhone or Android: simply sync Anki after audio has
-been added on the computer.
+Nothing needs to be installed on iPhone or Android.
 
 ## Voice Studio
 
-Use **Voice studio** to make a local voice profile. Add a short voice sample,
-enter the exact words spoken in it, choose the voice settings, and preview test
-text. You can save the profile, use it for card generation, or remove it later.
+Use **Voice studio** to create a local voice profile or save a separate MP3.
+
+1. Open **Voice studio** and enter a **Profile name**.
+2. Choose the language. For a cloned voice, add a clear 3–10-second WAV, MP3,
+   M4A, or FLAC sample and enter the exact words spoken in it. You can instead
+   create a described voice by choosing voice traits. **Automatic voice** is
+   also available when generating audio and does not need a saved profile.
+3. Click **Save profile**. The profile becomes available in **New cards** and
+   **Cards from Anki**.
+4. In **Speak any text**, enter text, choose a profile, and use **Listen** to
+   preview it or **Save MP3** to create a separate audio file. Use **Open
+   folder** to find the saved file.
 
 Only use voice samples that you have permission to use.
 
